@@ -1,40 +1,61 @@
-local UIS = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
 -- Max values
 local maxGas = 100
 local maxBlades = 100
-
--- Current values
 local gas = maxGas
-local bladesDurability = maxBlades
+local blades = maxBlades
 local thunderSpearAvailable = true
-local thunderSpearCooldown = 5 -- seconds for normal firing
+local refillTime = 20 -- seconds
+
+-- UI setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0, 300, 0, 100)
+statusLabel.Position = UDim2.new(0, 20, 0, 20)
+statusLabel.BackgroundTransparency = 0.5
+statusLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.TextScaled = true
+statusLabel.Parent = screenGui
+
+-- Function to update UI
+local function updateUI()
+    statusLabel.Text = "Gas: "..gas.."/"..maxGas.."\nBlades: "..blades.."/"..maxBlades.."\nThunder Spear: "..(thunderSpearAvailable and "Ready" or "Not Ready")
+end
+
+updateUI()
 
 -- Input handling
+local UIS = game:GetService("UserInputService")
 UIS.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.Space and gas >= 10 then
-        print("Boost!")
         gas = gas - 10
-    elseif input.KeyCode == Enum.KeyCode.E then
-        if bladesDurability > 0 then
-            print("Blade attack!")
-            bladesDurability = bladesDurability - 10
-        else
-            print("Blades are broken!")
-        end
-    elseif input.KeyCode == Enum.KeyCode.Q then
-        if thunderSpearAvailable then
-            print("Thunder Spear fired!")
-            thunderSpearAvailable = false
-            -- Normal cooldown (optional)
-            task.delay(thunderSpearCooldown, function()
-                if thunderSpearAvailable == false then
-                    print("Thunder Spear still on auto-refill timer...")
-                end
-            end)
-        else
-            print("Thunder Spear not ready yet!")
-        end
+        print("Boost used! Gas left:", gas)
+    elseif input.KeyCode == Enum.KeyCode.E and blades > 0 then
+        blades = blades - 10
+        print("Blade attack! Blades left:", blades)
+    elseif input.KeyCode == Enum.KeyCode.Q and thunderSpearAvailable then
+        thunderSpearAvailable = false
+        print("Thunder Spear fired!")
+    end
+    updateUI()
+end)
+
+-- Auto-refill loop every 20 seconds
+task.spawn(function()
+    while true do
+        task.wait(refillTime)
+        gas = maxGas
+        blades = maxBlades
+        thunderSpearAvailable = true
+        print("ODM Gear & Thunder Spear auto-refilled!")
+        updateUI()
+    end
+end)        end
     end
 end)
 print("ODM Auto-refill script loaded")
