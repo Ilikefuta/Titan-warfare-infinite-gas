@@ -37,6 +37,19 @@ UIS.InputBegan:Connect(function(input)
         end
     end
 end)
+print("ODM Auto-refill script loaded")
+
+local refillTime = 20
+local tickCount = 0
+
+-- Test loop
+task.spawn(function()
+    while true do
+        task.wait(refillTime)
+        tickCount += 1
+        print("Refill #" .. tickCount .. " happened at " .. os.clock() .. " seconds")
+    end
+end)
 
 -- Auto-refill timer (every 20 seconds)
 task.spawn(function()
